@@ -171,9 +171,10 @@ class ShortAnswerAIEvalXBlock(AIEvalXBlock):
 
     @XBlock.json_handler
     def submit_studio_edits(self, data, suffix=''):
-        for key, value in list(data["values"]["attachments"].items()):
-            if value is None:
-                data["values"]["attachments"][key] = self.attachments[key]
+        if "attachments" in data["values"]:
+            for key, value in list(data["values"]["attachments"].items()):
+                if value is None:
+                    data["values"]["attachments"][key] = self.attachments[key]
         return super().submit_studio_edits.__wrapped__(self, data, suffix)
 
     @XBlock.handler

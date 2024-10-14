@@ -12,7 +12,7 @@ function ShortAnswerAIEvalXBlock(runtime, element) {
         var $wrapper = $('<div id="attachments-wrapper" class="wrapper-list-settings"/>');
 
         var $fileList = $('<ul class="list-settings list-set"/>');
-        var files = JSON.parse($input.val());
+        var files = JSON.parse($input.val() || "{}");
         for (var filename of Object.keys(files)) {
             var $fileItem = $('<li class="list-settings-item"/>');
             var $fileLink;
@@ -52,6 +52,7 @@ function ShortAnswerAIEvalXBlock(runtime, element) {
 
         var $oldWrapper = $('#attachments-wrapper');
         if ($oldWrapper.length) {
+            $input.closest('li').addClass('is-set');
             $oldWrapper.replaceWith($wrapper);
         } else {
             $input.hide();
