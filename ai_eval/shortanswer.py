@@ -8,7 +8,7 @@ from django.utils.translation import gettext_noop as _
 from web_fragments.fragment import Fragment
 from xblock.core import XBlock
 from xblock.exceptions import JsonHandlerError
-from xblock.fields import Integer, String, Scope
+from xblock.fields import Dict, Integer, String, Scope
 from xblock.validation import ValidationMessage
 
 from .llm import get_llm_response
@@ -37,7 +37,17 @@ class ShortAnswerAIEvalXBlock(AIEvalXBlock):
         default=3,
     )
 
-    editable_fields = AIEvalXBlock.editable_fields + ("max_responses",)
+    attachments = Dict(
+        display_name=_("Attachments"),
+        help=_("Attachments to include with the evaluation prompt"),
+        scope=Scope.settings,
+        resettable_editor=False,
+    )
+
+    editable_fields = AIEvalXBlock.editable_fields + (
+        "max_responses",
+        "attachments",
+    )
 
     def validate_field_data(self, validation, data):
         """
@@ -100,6 +110,11 @@ class ShortAnswerAIEvalXBlock(AIEvalXBlock):
                """,
         }
         messages = [system_msg]
+        for filename, contents in self.attachments.items():
+            messages.append({
+                "role": "user",
+                "content": f"Attachment {filename}:\n{contents}"
+            })
         # add previous messages
         # the first AI role is 'system' which defines the LLM's personnality and behavior.
         # subsequent roles are 'assistant' and 'user'
@@ -131,6 +146,16 @@ class ShortAnswerAIEvalXBlock(AIEvalXBlock):
             return {"response": response}
 
         raise JsonHandlerError(500, "A probem occured. The LLM sent an empty response.")
+
+    def studio_view(self, context):
+        """
+        Render a form for editing this XBlock
+        """
+        fragment = super().studio_view(context)
+        fragment.add_javascript(self.resource_string("static/js/src/shortanswer_edit.js"))
+        # ShortAnswerAIEvalXBlock() in base.js will call StudioEditableXBlockMixin().
+        fragment.initialize_js("ShortAnswerAIEvalXBlock")
+        return fragment
 
     @staticmethod
     def workbench_scenarios():
