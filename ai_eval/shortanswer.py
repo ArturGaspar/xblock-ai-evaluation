@@ -1,8 +1,8 @@
 """Short answers Xblock with AI evaluation."""
 
+import json
 import logging
 import traceback
-
 
 from django.utils.translation import gettext_noop as _
 from web_fragments.fragment import Fragment
@@ -156,6 +156,24 @@ class ShortAnswerAIEvalXBlock(AIEvalXBlock):
         # ShortAnswerAIEvalXBlock() in base.js will call StudioEditableXBlockMixin().
         fragment.initialize_js("ShortAnswerAIEvalXBlock")
         return fragment
+
+    # Optimisation: don't send file contents to the edit view,
+    # and use null value as flag to keep same contents.
+
+    def _make_field_info(self, field_name, field):
+        info = super()._make_field_info(field_name, field)
+        if field_name == "attachments":
+            info["value"] = json.dumps(
+                {f: None for f in field.read_from(self).keys()}
+            )
+        return info
+
+    @XBlock.json_handler
+    def submit_studio_edits(self, data, suffix=''):
+        for key, value in list(data["values"]["attachments"].items()):
+            if value is None:
+                data["values"]["attachments"][key] = self.attachments[key]
+        return super().submit_studio_edits.__wrapped__(self, data, suffix)
 
     @staticmethod
     def workbench_scenarios():
