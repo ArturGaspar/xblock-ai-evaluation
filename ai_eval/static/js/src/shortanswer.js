@@ -1,12 +1,14 @@
 /* Javascript for ShortAnswerAIEvalXBlock. */
 function ShortAnswerAIEvalXBlock(runtime, element, data) {
   const handlerUrl = runtime.handlerUrl(element, "get_response");
+  const resetHandlerURL = runtime.handlerUrl(element, "reset");
 
   loadMarkedInIframe(data.marked_html);
 
   $(function () {
     const spinner = $(".message-spinner", element);
     const spinnnerContainer = $("#chat-spinner-container", element);
+    const resetButton = $("#reset-button", element);
     const submitButton = $("#submit-button", element);
     const userInput = $(".user-input", element);
     const userInputElem = userInput[0];
@@ -45,6 +47,22 @@ function ShortAnswerAIEvalXBlock(runtime, element, data) {
     }
 
     submitButton.click(getResponse);
+
+    resetButton.click(() => {
+      $.ajax({
+        url: resetHandlerURL,
+        method: "POST",
+        data: JSON.stringify({}),
+        success: function (data) {
+          spinnnerContainer.prevAll('.chat-message-container').remove();
+        },
+        error: function(xhr, status, error) {
+          console.error('Error:', error);
+          alert("A problem occured during reset.");
+        }
+      });
+
+    });
 
     function disableInput() {
       userInput.prop("disabled", true);

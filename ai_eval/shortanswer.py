@@ -158,6 +158,14 @@ class ShortAnswerAIEvalXBlock(AIEvalXBlock):
 
         raise JsonHandlerError(500, "A probem occured. The LLM sent an empty response.")
 
+    @XBlock.json_handler
+    def reset(self, data, suffix=""):  # pylint: disable=unused-argument
+        """
+        Reset the Xblock.
+        """
+        self.messages = {self.USER_KEY: [], self.LLM_KEY: []}
+        return {}
+
     def studio_view(self, context):
         """
         Render a form for editing this XBlock
