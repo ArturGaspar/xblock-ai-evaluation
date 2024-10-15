@@ -55,6 +55,7 @@ function ShortAnswerAIEvalXBlock(runtime, element, data) {
         data: JSON.stringify({}),
         success: function (data) {
           spinnnerContainer.prevAll('.chat-message-container').remove();
+          enableInput();
         },
         error: function(xhr, status, error) {
           console.error('Error:', error);
