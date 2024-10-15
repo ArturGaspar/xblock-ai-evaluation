@@ -110,22 +110,31 @@ class ShortAnswerAIEvalXBlock(AIEvalXBlock):
     def get_response(self, data, suffix=""):  # pylint: disable=unused-argument
         """Get LLM feedback"""
         user_submission = str(data["user_input"])
+
+        attachments = []
+        for filename, contents in self.attachments.items():
+            # TODO: escape
+            attachments.append(f"""
+                <attachment>
+                    <filename>{filename}</filename>
+                    <contents>{contents}</contents>
+                </attachment>
+            """)
+        attachments = '\n'.join(attachments)
+
         system_msg = {
             "role": "system",
             "content": f"""
-               {self.evaluation_prompt}
+                {self.evaluation_prompt}
+                
+                {attachments}
 
-               {self.question}.
+                {self.question}.
 
-               Evaluation must be in Makrdown format.
-               """,
+                Evaluation must be in Markdown format.
+            """,
         }
         messages = [system_msg]
-        for filename, contents in self.attachments.items():
-            messages.append({
-                "role": "user",
-                "content": f"Attachment {filename}:\n{contents}"
-            })
         # add previous messages
         # the first AI role is 'system' which defines the LLM's personnality and behavior.
         # subsequent roles are 'assistant' and 'user'
