@@ -132,6 +132,14 @@ class ShortAnswerAIEvalXBlock(AIEvalXBlock):
 
         raise JsonHandlerError(500, "A probem occured. The LLM sent an empty response.")
 
+    @XBlock.json_handler
+    def reset(self, data, suffix=""):
+        """
+        Reset the Xblock.
+        """
+        self.messages = {self.USER_KEY: [], self.LLM_KEY: []}
+        return {}
+
     @staticmethod
     def workbench_scenarios():
         """A canned scenario for display in the workbench."""

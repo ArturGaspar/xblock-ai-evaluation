@@ -55,7 +55,7 @@
 .submit-row .user-input {
   flex: 8;
   height: auto;
-  margin-right: 10px;
+  margin: 0 10px;
   border: 1px solid gray;
   border-radius: 5px;
   overflow: auto;
